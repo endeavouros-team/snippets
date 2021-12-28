@@ -5,6 +5,7 @@
 set -xe
 
 main() {
+    # :: swap :: #
     swapoff /swap/swapfile
     truncate -s 0 /swap/swapfile
     chattr +C /swap/swapfile
@@ -16,9 +17,11 @@ main() {
     mkswap /swap/swapfile
     swapon /swap/swapfile
 
+    # :: btrfs_map_physical :: #
     wget https://raw.githubusercontent.com/osandov/osandov-linux/master/scripts/btrfs_map_physical.c
     gcc -O2 -o btrfs_map_physical btrfs_map_physical.c
 
+    # :: edit grub :: #
     offset=$(./btrfs_map_physical /swap/swapfile)
     offset_arr=($(echo ${offset}))
     offset_pagesize=($(getconf PAGESIZE))
@@ -28,11 +31,14 @@ main() {
     sed -i "s/loglevel=3/resume_offset=$offset loglevel=3/" /etc/default/grub
     sed -i 's/keymap encrypt filesystems/keymap encrypt filesystems resume/' /etc/mkinitcpio.conf
 
+    # :: remake images :: #
     grub-mkconfig -o /boot/grub/grub.cfg
     mkinitcpio -P
 
+    # :: cleanup :: #
     rm btrfs_map_physical.c
     rm btrfs_map_physical
+
     echo "All done please reboot!"
 }
 
