@@ -25,3 +25,4 @@ grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -P
 rm btrfs_map_physical.c
 rm btrfs_map_physical
+echo "All done please reboot!"
