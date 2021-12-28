@@ -30,7 +30,7 @@ main() {
 
     sed -i "s#loglevel=3#resume=$btrfsonluks loglevel=3#" /etc/default/grub
     sed -i "s/loglevel=3/resume_offset=$offset loglevel=3/" /etc/default/grub
-    sed -i 's/keymap encrypt filesystems/keymap encrypt filesystems resume/' /etc/mkinitcpio.conf
+    sed -i 's/keymap consolefont encrypt filesystems/keymap consolefont encrypt filesystems resume/' /etc/mkinitcpio.conf
 
     # :: remake images :: #
     grub-mkconfig -o /boot/grub/grub.cfg
