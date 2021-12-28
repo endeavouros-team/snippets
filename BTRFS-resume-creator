@@ -1,37 +1,27 @@
-#!/bin/bash
-echo "swapoff /swap/swapfile"
+#!/usr/bin/env bash
+
+# -x = show every command executed
+# -e = abort on failure
+set -xe
+
 swapoff /swap/swapfile
-echo "truncate -s 0 /swap/swapfile
 truncate -s 0 /swap/swapfile
-echo "chattr +C /swap/swapfile
 chattr +C /swap/swapfile
-echo "btrfs property set /swap/swapfile compression none
 btrfs property set /swap/swapfile compression none
-echo "recreate swapfile with 8GB on"
 dd if=/dev/zero of=/swap/swapfile bs=1M count=8000 status=progress
-echo "chmod 600 /swap/swapfile"
 chmod 600 /swap/swapfile
-echo "mkswap /swap/swapfile"
 mkswap /swap/swapfile
-echo "swapon /swap/swapfile"
 swapon /swap/swapfile
-echo "download btrfs_map_physical.c"
 wget https://raw.githubusercontent.com/osandov/osandov-linux/master/scripts/btrfs_map_physical.c
-echo "build btrfs_map_physical"
 gcc -O2 -o btrfs_map_physical btrfs_map_physical.c
 offset=`./btrfs_map_physical /swap/swapfile`
 offset_arr=(`echo ${offset}`)
 offset_pagesize=(`getconf PAGESIZE`)
 offset=$(( offset_arr[25] / offset_pagesize ))
-echo "add resume resume_offset to grub kernel line"
 sed -i "s#loglevel=3#resume=$btrfsonluks loglevel=3#" /etc/default/grub
 sed -i "s/loglevel=3/resume_offset=$offset loglevel=3/" /etc/default/grub
-echo "enable resume for mkinitcpio"
 sed -i 's/keymap encrypt filesystems/keymap encrypt filesystems resume/' /etc/mkinitcpio.conf
-echo "rebuild grub.cfg and kernel images"
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -P
-echo "clean up"
 rm btrfs_map_physical.c
 rm btrfs_map_physical
-echo "All done please reboot!"
