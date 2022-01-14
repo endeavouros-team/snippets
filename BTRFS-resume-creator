@@ -27,9 +27,9 @@ main() {
     offset_arr=($(echo ${offset}))
     offset_pagesize=($(getconf PAGESIZE))
     offset=$((offset_arr[25] / offset_pagesize))
-    btrfsroot=`sudo blkid -o device`
+    btrfsroot=`findmnt / -no UUID`
 
-    sed -i "s#loglevel=3#resume=$btrfsonluks loglevel=3#" /etc/default/grub
+    sed -i "s#loglevel=3#resume=$btrfsroot loglevel=3#" /etc/default/grub
     sed -i "s/loglevel=3/resume_offset=$offset loglevel=3/" /etc/default/grub
     sed -i 's/keymap consolefont filesystems/keymap consolefont filesystems resume/' /etc/mkinitcpio.conf
 
